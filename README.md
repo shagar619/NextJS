@@ -22,3 +22,17 @@ Next.js is a React framework that enables several extra features, including serv
 - **Internationalization (i18n)**: Next.js provides built-in support for internationalized routing and localization.
 - **Incremental Static Regeneration (ISR)**: Next.js allows you to update static content after the site has been built, enabling you to keep your static pages up-to-date without a full rebuild.
 
+## Getting Started with Next.js
+To get started with Next.js, you can follow these steps:
+1. **Install Node.js**: Make sure you have Node.js installed on your machine. You can download it from [nodejs.org](https://nodejs.org/).
+2. **Create a New Next.js App**: You can create a new Next.js application using the following command:
+```bash
+     npx create-next-app@latest my-next-app
+     cd my-next-app
+```
+3. **Run the Development Server**: Start the development server with the following command:
+```bash
+     npm run dev
+```
+4. **Open Your Browser**: Open your browser and navigate to `http://localhost:3000` to see your Next.js application in action.
+5. **Start Building**: You can start building your Next.js application by creating new pages in the `pages` directory and adding components as needed.
