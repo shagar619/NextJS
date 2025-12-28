@@ -30,9 +30,55 @@ To get started with Next.js, you can follow these steps:
      npx create-next-app@latest my-next-app
      cd my-next-app
 ```
+
+You will be prompted for the following:
+| Prompt | Recommended Response |
+|--------|----------------------|
+| What is your project named? | my-next-app |
+| Would you like to use the recommended Next.js defaults? | No Customize Settings |
+| Would you like to use **TypeScript** with this project? | Yes (recommended) |
+| Which linter would you like to use? | Eslint |
+| Would you like to use **React Compiler**? | Yes (recommended) |
+| Would you like to use **Tailwind CSS**? | Yes (recommended) |
+| Would you like to use `src/` directory with this project? | Yes (recommended) |
+| Would you like to use **App Router** (recommended)? | Yes (recommended) |
+| Would you like to customize the **import alias** (`@/*` by default)? | No (default) |
+| Would you like to use turbo (recommended)? | Yes (recommended) |
+
+
 3. **Run the Development Server**: Start the development server with the following command:
 ```bash
      npm run dev
 ```
-4. **Open Your Browser**: Open your browser and navigate to `http://localhost:3000` to see your Next.js application in action.
-5. **Start Building**: You can start building your Next.js application by creating new pages in the `pages` directory and adding components as needed.
+
+4. **Understanding the Project Structure**:
+If you chose the App Router and src directory, you will see a structure similar to:
+```
+my-app/
+├── public/                 # Static assets (images, fonts, robots.txt)
+├── src/                    # Main source code
+│   ├── app/                # App Router (Routes, Layouts, Metadata)
+│   │   ├── (auth)/         # Route Group (doesn't affect URL)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── api/            # Route Handlers (Backend endpoints)
+│   │   │   └── route.ts
+│   │   ├── globals.css     # Global styles
+│   │   ├── layout.tsx      # Root Layout (required)
+│   │   └── page.tsx        # Homepage (/)
+│   ├── components/         # Reusable UI components
+│   │   ├── ui/             # Shadcn/UI or atomic components
+│   │   └── forms/          # Feature-specific components
+│   ├── hooks/              # Custom React hooks
+│   ├── lib/                # Shared utilities & SDK configs (Prisma, Stripe)
+│   ├── actions/            # Server Actions (form submissions, DB logic)
+│   ├── types/              # TypeScript interfaces/definitions
+│   └── proxy.ts       # Request-level logic (Auth, Redirects)
+├── .env.local              # Environment variables
+├── next.config.ts          # Next.js configuration
+├── tailwind.config.ts      # Styling configuration
+└── tsconfig.json           # TypeScript configuration
+```
+
+
