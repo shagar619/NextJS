@@ -81,4 +81,20 @@ my-app/
 └── tsconfig.json           # TypeScript configuration
 ```
 
+## 🔑 Key Concepts for Modern Apps
+- **App Router**: The new routing system in Next.js that uses the `app/` directory to define routes, layouts, and metadata.
+- **Server Components**: Components that are rendered on the server, allowing for improved performance and SEO.
+- **Client Components**: Components that are rendered on the client side, enabling interactivity and state management.
+- **Layouts**: Reusable components that define the structure of pages, allowing for consistent design across the application.
+- **Route Handlers**: Functions that handle API requests, allowing you to create backend endpoints within your Next.js application.
+- **Server Actions**: Functions that can be called from the client to perform server-side logic, such as form submissions and database operations.
 
+
+## 🏗️ File Conventions inside `app/`
+- **page.tsx**: The main component for a route. Each folder inside `app/` represents a route, and the `page.tsx` file defines the content for that route.
+- **layout.tsx**: Defines the layout for a route and its sub-routes. Layouts can include headers, footers, and other common elements.
+- **route.ts**: Defines API route handlers for backend endpoints. This file is used to create server-side logic for specific routes.
+- **loading.tsx**: A component that is displayed while a route is loading. This can be used to show loading spinners or skeleton screens.
+- **error.tsx**: A component that is displayed when an error occurs while rendering a route. This can be used to show error messages to users.
+- **template.tsx**: A component that wraps around pages and layouts, allowing you to define common elements that should be present on all pages.
+- **proxy.ts**: A component that handles request-level logic, such as authentication and redirects.
