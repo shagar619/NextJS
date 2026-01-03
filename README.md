@@ -98,3 +98,16 @@ my-app/
 - **error.tsx**: A component that is displayed when an error occurs while rendering a route. This can be used to show error messages to users.
 - **template.tsx**: A component that wraps around pages and layouts, allowing you to define common elements that should be present on all pages.
 - **proxy.ts**: A component that handles request-level logic, such as authentication and redirects.
+
+
+
+## API Routes
+API routes in Next.js allow you to create backend endpoints within your application. You can define API routes by creating a `route.ts` file inside the `app/api/` directory. Here's an example of how to create a simple API route:
+```typescript
+// src/app/api/hello/route.ts
+import { NextResponse } from 'next/server';
+export async function GET() {
+  return NextResponse.json({ message: 'Hello, Next.js API!' });
+}
+```
+In this example, we define a GET endpoint that returns a JSON response with a message. You can create additional API routes by adding more folders and `route.ts` files inside the `app/api/` directory.
