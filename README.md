@@ -190,3 +190,109 @@ Dynamic routing in Next.js refers to the framework’s capability to generate ro
 Below is a concise yet comprehensive breakdown of how it works:
 
 **1. File-System Based Dynamic Segments:**
+Next.js uses the file system as the primary API for routing. A dynamic segment is created by wrapping a filename or folder name in square brackets:
+
+- `pages/posts/[id].js`
+Matches any route shaped like `/posts/<id>`.
+
+- In the App Router (Next.js 13+), dynamic segments exist within the `app/` directory:
+
+    - `app/posts/[id]/page.js`
+Matches any route shaped like `/posts/<id>`.
+The value inside the brackets is treated as a parameter.
+Example: For a URL `/posts/123`, the parameter `id` would have the value `123`.
+
+**2. Accessing Dynamic Parameters:**
+**Pages Router (`pages/`):**
+- Parameters are available on the `context.params` object inside `getStaticProps`, `getServerSideProps`, and `getStaticPaths`.
+- In the component, `useRouter()` provides `router.query`, which includes the param values.
+
+```javascript
+// pages/posts/[id].js
+import { useRouter } from 'next/router';
+const PostPage = () => {
+  const router = useRouter();
+  const { id } = router.query; // Access dynamic parameter
+  return <div>Post ID: {id}</div>;
+};
+export default PostPage;
+```
+**App Router (`app/`):**
+- Route handlers (server components) receive `params` via the params argument of the layout or page function:
+```javascript
+// app/posts/[id]/page.js
+const PostPage = ({ params }) => {
+  const { id } = params; // Access dynamic parameter
+  return <div>Post ID: {id}</div>;
+};
+export default PostPage;
+```
+- Client components can access params using `useParams()` from `next/navigation`.
+```javascript
+import { useParams } from 'next/navigation';
+const PostPage = () => {
+  const params = useParams();
+  const { id } = params; // Access dynamic parameter
+  return <div>Post ID: {id}</div>;
+};
+export default PostPage;
+```
+**3. Pre-rendering with Dynamic Routes:**
+- **Static Generation (SSG)**: Use `getStaticPaths` to specify which dynamic routes to pre-render at build time.
+```javascript
+// pages/posts/[id].js
+export async function getStaticPaths() {
+  const paths = [{ params: { id: '1' } }, { params: { id: '2' } }];
+  return { paths, fallback: false };
+}
+```
+- **Server-Side Rendering (SSR)**: Dynamic routes can also be rendered on each request using `getServerSideProps`.
+```javascript
+// pages/posts/[id].js
+export async function getServerSideProps(context) {
+  const { id } = context.params;
+  // Fetch data based on id
+  return { props: { id } };
+}
+```
+**4. Nested Dynamic Routes:**
+You can create nested dynamic routes by combining static and dynamic segments:
+- `pages/users/[userId]/posts/[postId].js`
+Matches routes like `/users/<userId>/posts/<postId>`.
+- In the App Router:
+    - `app/users/[userId]/posts/[postId]/page.js`
+Matches routes like `/users/<userId>/posts/<postId>`.
+**5. Catch-All Routes:**
+Next.js supports catch-all routes using triple dots (`...`) in the filename:
+- `pages/docs/[...slug].js`
+Matches routes like `/docs/a/b/c`, where `slug` is an array of all segments.
+- In the App Router:
+    - `app/docs/[...slug]/page.js`
+Matches routes like `/docs/a/b/c`, where `slug` is an array of all segments.
+```javascript
+// pages/docs/[...slug].js
+import { useRouter } from 'next/router';
+const DocsPage = () => {
+  const router = useRouter();
+  const { slug } = router.query; // slug is an array
+  return <div>Slug: {slug.join('/')}</div>;
+};
+export default DocsPage;
+```
+**6. Optional Catch-All Routes:**
+You can create optional catch-all routes by adding double square brackets:
+- `pages/docs/[[...slug]].js`
+Matches `/docs`, `/docs/a`, `/docs/a/b`, etc.
+- In the App Router:
+    - `app/docs/[[...slug]]/page.js`
+```javascript
+// pages/docs/[[...slug]].js
+import { useRouter } from 'next/router';
+const DocsPage = () => {
+  const router = useRouter();
+  const { slug } = router.query; // slug can be undefined or an array
+  return <div>Slug: {slug ? slug.join('/') : 'home'}</div>;
+};
+export default DocsPage;
+```
+This flexibility allows you to build complex and dynamic applications with ease, leveraging Next.js's powerful routing capabilities.
