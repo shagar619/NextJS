@@ -143,3 +143,44 @@ In this example, the `getServerSideProps` function fetches data on the server si
 - **Server-Side Processing**: The server executes the JavaScript code, fetches data if needed, and renders the complete HTML.
 - **Sending Rendered HTML to Client**: The fully rendered HTML, along with necessary CSS and JavaScript, is sent to the browser.
 - **Client-Side Hydration**: Once the HTML is received, JavaScript runs to enable interactive elements on the client.
+
+
+## Client-side navigation in Next.js
+**Link Component:**
+Next.js provides a built-in `Link` component for client-side navigation between pages. This allows for faster transitions without full page reloads. Here's an example of how to use the `Link` component:
+```typescript
+// src/app/page.tsx
+import Link from 'next/link';
+const HomePage = () => {
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+      <Link href="/about">
+        <a>Go to About Page</a>
+      </Link>
+    </div>
+  );
+};
+export default HomePage;
+```
+In this example, clicking the "Go to About Page" link will navigate to the `/about` page using client-side navigation.
+
+**Programmatic Navigation:**
+You can also programmatically navigate between pages using the `router` object from `next/router`. Here's an example:
+```typescript
+// src/app/page.tsx
+import { useRouter } from 'next/router';
+const HomePage = () => {
+  const router = useRouter();
+  const handleClick = () => {
+    router.push('/about');
+  };
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+      <button onClick={handleClick}>Go to About Page</button>
+    </div>
+  );
+};
+export default HomePage;
+```
