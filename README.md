@@ -185,7 +185,28 @@ const HomePage = () => {
 export default HomePage;
 ```
 
-## Dynamic routing in Next.js
+## Next.js Routing System
+Next.js provides a file-system–based routing architecture, meaning that routes are created automatically based on the directory and file structure within the project.
+
+#### Directory-Based Routing
+Every folder inside `app/` represents a route segment, and special files inside segments define how that segment behaves.
+
+**Key Route Segment Files:**
+| File Name      | Purpose                                      |
+|----------------|----------------------------------------------|
+| `page.tsx`      | Defines the main content of a route segment  |
+| `layout.tsx`    | Defines the layout for a route segment       |
+| `loading.tsx`   | Defines a loading state for a route segment  |
+| `error.tsx`     | Defines an error boundary for a route segment|
+| `not-found.tsx` | Defines a not-found page for a route segment |
+| `template.tsx`   | Wraps pages and layouts for common elements    |
+| `route.ts`     | Defines API route handlers for backend logic |
+| `proxy.ts`     | Handles request-level logic (Auth, Redirects) |
+| `global-error.ts` | Defines a global error boundary for the entire application |
+| `default.tsx`  | Defines default exports for route segments    |
+
+
+
 Dynamic routing in Next.js refers to the framework’s capability to generate route segments at runtime based on variable URL parameters. Instead of defining every path explicitly, you can create file-based route templates that match multiple URL patterns. This allows you to handle content with unique identifiers—such as blog posts, product pages, or user profiles—without manually creating a separate page file for each instance.
 Below is a concise yet comprehensive breakdown of how it works:
 
@@ -262,6 +283,7 @@ Matches routes like `/users/<userId>/posts/<postId>`.
 - In the App Router:
     - `app/users/[userId]/posts/[postId]/page.js`
 Matches routes like `/users/<userId>/posts/<postId>`.
+
 **5. Catch-All Routes:**
 Next.js supports catch-all routes using triple dots (`...`) in the filename:
 - `pages/docs/[...slug].js`
@@ -295,4 +317,120 @@ const DocsPage = () => {
 };
 export default DocsPage;
 ```
-This flexibility allows you to build complex and dynamic applications with ease, leveraging Next.js's powerful routing capabilities.
+
+URL Structure and Route Segments
+
+Segments can be:
+- Static: Fixed names like `about`, `contact`.
+- Dynamic: Variable names in brackets like `[id]`, `[slug]`.
+- Parallel segments: `@segment`.
+- Catch-All: Using `[...]` to capture multiple segments.
+- Optional Catch-All: Using `[[...]]` to capture zero or more segments.
+- Route Groups: Using parentheses `(group)` to organize routes without affecting the URL.
+- Intercepting Routes: Using `()` to create routes that can be accessed from multiple paths.
+
+## Client vs Server Components
+Next.js 13 introduced the concept of Server and Client Components to optimize rendering and improve performance. Here's a breakdown of the differences between the two:
+| Feature               | Server Components                          | Client Components                         |
+|-----------------------|--------------------------------------------|-------------------------------------------|
+| Rendering Location    | Rendered on the server                     | Rendered on the client                    |
+| Interactivity         | Not interactive, used for static content   | Interactive, can handle user events        |
+| Data Fetching         | Can fetch data directly from the server    | Cannot fetch data directly, relies on props or hooks |
+| State Management      | Cannot use React state or lifecycle methods| Can use React state and lifecycle methods |
+| Bundle Size           | Not included in the client bundle          | Included in the client bundle               |
+| Use Cases             | Layouts, static content, data fetching     | Forms, buttons, modals, interactive UI elements |
+
+- By default, files in `app/` are React Server Components (RSC).
+- Client components require `"use client"` at the top.
+- Routing functions (`useRouter`, `usePathname`, `useSearchParams`) are client-side only.
+
+
+## Data Fetching and Rendering
+Next.js provides several methods for data fetching and rendering, allowing you to choose the best approach for your application's needs. Here are the main methods:
+1. **Static Site Generation (SSG)**:
+   - Use `getStaticProps` to fetch data at build time.
+   - Ideal for pages that can be pre-rendered and do not require frequent updates.
+- Example:
+```typescript
+   // pages/index.tsx
+   export async function getStaticProps() {
+     const data = await fetchData();
+     return { props: { data } };
+   }
+   const HomePage = ({ data }) => {
+     return <div>{data}</div>;
+   };
+   export default HomePage;
+```
+2. **Server-Side Rendering (SSR)**:
+   - Use `getServerSideProps` to fetch data on each request.
+   - Suitable for pages that require up-to-date data on every load.
+- Example:
+```typescript
+     // pages/index.tsx
+     export async function getServerSideProps() {
+       const data = await fetchData();
+       return { props: { data } };
+     }
+     const HomePage = ({ data }) => {
+       return <div>{data}</div>;
+     };
+     export default HomePage;
+```
+3. **Client-Side Fetching**:
+   - Use React hooks like `useEffect` to fetch data on the client side.
+   - Useful for interactive pages where data needs to be fetched after the initial render.
+- Example:
+```typescript
+     // pages/index.tsx
+     import { useEffect, useState } from 'react';
+     const HomePage = () => {
+       const [data, setData] = useState(null);
+       useEffect(() => {
+         async function fetchData() {
+           const response = await fetch('/api/data');
+           const result = await response.json();
+           setData(result);
+         }
+         fetchData();
+       }, []);
+       return <div>{data}</div>;
+     };
+     export default HomePage;
+```
+4. **Incremental Static Regeneration (ISR)**:
+   - Use `revalidate` in `getStaticProps` to update static pages after a specified interval.
+   - Allows you to keep static content fresh without rebuilding the entire site.
+- Example:
+```typescript
+     // pages/index.tsx
+     export async function getStaticProps() {
+       const data = await fetchData();
+       return {
+         props: { data },
+         revalidate: 60, // Revalidate every 60 seconds
+       };
+     }
+     const HomePage = ({ data }) => {
+       return <div>{data}</div>;
+     };
+     export default HomePage;
+```
+5. **Server Actions**:
+   - Functions that can be called from the client to perform server-side logic, such as form submissions and database operations.
+- Example:
+```typescript
+     // src/app/contact/page.tsx
+     'use server';
+     export async function submitForm(data: FormData) {
+       // Handle form submission on the server
+     }
+     const ContactPage = () => {
+       return (
+         <form action={submitForm}>
+           {/* Form fields */}
+         </form>
+       );
+     };
+     export default ContactPage;
+```
