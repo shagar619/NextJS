@@ -184,3 +184,9 @@ const HomePage = () => {
 };
 export default HomePage;
 ```
+
+## Dynamic routing in Next.js
+Dynamic routing in Next.js refers to the framework’s capability to generate route segments at runtime based on variable URL parameters. Instead of defining every path explicitly, you can create file-based route templates that match multiple URL patterns. This allows you to handle content with unique identifiers—such as blog posts, product pages, or user profiles—without manually creating a separate page file for each instance.
+Below is a concise yet comprehensive breakdown of how it works:
+
+**1. File-System Based Dynamic Segments:**
