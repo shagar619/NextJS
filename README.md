@@ -111,3 +111,35 @@ export async function GET() {
 }
 ```
 In this example, we define a GET endpoint that returns a JSON response with a message. You can create additional API routes by adding more folders and `route.ts` files inside the `app/api/` directory.
+
+## SSR
+Next.js supports Server-Side Rendering (SSR) by default. You can create server-rendered pages by exporting an `async` function named `getServerSideProps` from your page component. Here's an example:
+```typescript
+// src/app/ssr-example/page.tsx
+import { GetServerSideProps } from 'next';
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Fetch data from an API or database
+  const data = await fetchData();
+  return {
+    props: {
+      data,
+    },
+  };
+};
+const SSRExamplePage = ({ data }: { data: any }) => {
+  return (
+    <div>
+      <h1>Server-Side Rendered Page</h1>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
+};
+export default SSRExamplePage;
+```
+In this example, the `getServerSideProps` function fetches data on the server side and passes it as props to the `SSRExamplePage` component.
+In this example, the `getServerSideProps` function fetches data on the server side and passes it as props to the `SSRExamplePage` component.
+**Key points:**
+- **Request from Client**: The user requests a web page from the server.
+- **Server-Side Processing**: The server executes the JavaScript code, fetches data if needed, and renders the complete HTML.
+- **Sending Rendered HTML to Client**: The fully rendered HTML, along with necessary CSS and JavaScript, is sent to the browser.
+- **Client-Side Hydration**: Once the HTML is received, JavaScript runs to enable interactive elements on the client.
