@@ -112,37 +112,82 @@ export async function GET() {
 ```
 In this example, we define a GET endpoint that returns a JSON response with a message. You can create additional API routes by adding more folders and `route.ts` files inside the `app/api/` directory.
 
-## SSR
-Next.js supports Server-Side Rendering (SSR) by default. You can create server-rendered pages by exporting an `async` function named `getServerSideProps` from your page component. Here's an example:
+## Server-Side Rendering (SSR) in Next.jsServer-Side Rendering (SSR) in Next.js
+**SSR (Server-Side Rendering)** is a rendering strategy in which a page’s **HTML** is generated **on the server** at request time. When a user requests a route, Next.js executes server-side logic (data fetching, authentication, computation, etc.), renders the React components on the server, and returns fully populated HTML to the browser.
+
+**This enables:**
+- Faster initial page load (especially for SEO-critical pages)
+- Better SEO due to fully prepared HTML
+- Dynamic data on each request
+- Secure server-only data access at render time
+
+SSR is one of the core rendering modes in Next.js, alongside static generation (SSG), ISR, and client-side rendering (CSR).
+
+**SSR Works (Conceptual Flow):**
+
+1. User requests a route (example: `/dashboard`).
+2. Next.js server receives the request.
+3. Server executes data-fetching logic
+
+  - API calls
+  - Database queries
+  - Session validation
+  - Business rules, transformations
+
+4. Next.js renders the React component tree on the server, producing HTML.
+5. HTML is sent to the browser.
+6. Browser hydrates the HTML with React client-side JavaScript.
+
+This ensures content is available before hydration, resulting in better user experience and improved search engine reachability.
+
+**SSR in the App Router (`app/` directory):**
+In the App Router, SSR is the default.
+
+Every server component is automatically rendered on the server at request time unless cached.
+
+**SSR Page Example (App Router):**
 ```typescript
-// src/app/ssr-example/page.tsx
-import { GetServerSideProps } from 'next';
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // Fetch data from an API or database
-  const data = await fetchData();
-  return {
-    props: {
-      data,
-    },
-  };
-};
-const SSRExamplePage = ({ data }: { data: any }) => {
+// app/users/page.js
+export default async function UsersPage() {
+  const res = await fetch("https://api.example.com/users", {
+    cache: "no-store"     // ensures SSR - fetches on every request
+  });
+  const users = await res.json();
+
   return (
     <div>
-      <h1>Server-Side Rendered Page</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+      <h1>Active Users</h1>
+      <ul>
+        {users.map(user => (
+          <li key={user.id}>{user.name} — {user.email}</li>
+        ))}
+      </ul>
     </div>
   );
-};
-export default SSRExamplePage;
+}
 ```
-In this example, the `getServerSideProps` function fetches data on the server side and passes it as props to the `SSRExamplePage` component.
-In this example, the `getServerSideProps` function fetches data on the server side and passes it as props to the `SSRExamplePage` component.
-**Key points:**
-- **Request from Client**: The user requests a web page from the server.
-- **Server-Side Processing**: The server executes the JavaScript code, fetches data if needed, and renders the complete HTML.
-- **Sending Rendered HTML to Client**: The fully rendered HTML, along with necessary CSS and JavaScript, is sent to the browser.
-- **Client-Side Hydration**: Once the HTML is received, JavaScript runs to enable interactive elements on the client.
+
+**Next.js automatically uses SSR when:**
+
+- A route contains dynamic data fetching with cache: **"no-store"**.
+- A route uses searchParams that are not static.
+- A route uses cookies or headers (`cookies()`, `headers()`).
+- A route calls non-cacheable server functions.
+
+**Use Cases for SSR:**
+Appropriate When:
+- Content changes frequently (financial dashboards, ticket availability)
+- SEO-critical dynamic content (news websites)
+- Personalized pages (logged-in dashboards)
+- Multi-tenant content (user-specific pages)
+- Access-controlled pages (admin panels)
+
+Not Appropriate When:
+
+- Data does not change frequently (prefer static generation)
+- No SEO impact and performance matters (prefer CSR)
+- High-traffic pages with unnecessary server load (SSR is more expensive)
+
 
 
 ## Client-side navigation in Next.js
