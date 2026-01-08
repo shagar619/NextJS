@@ -318,6 +318,21 @@ const DocsPage = () => {
 export default DocsPage;
 ```
 
+
+### Comparing App Router and Pages Router
+| Feature                     | App Router (`app/` directory)               | Pages Router (`pages/` directory)          |
+|-----------------------------|----------------------------------------------|---------------------------------------------|
+| Routing Structure           | File-system based with layouts and templates | File-system based without layouts          |
+| Data Fetching               | Server and Client Components                 | `getStaticProps`, `getServerSideProps`            |
+| Layouts                     | Supported with `layout.tsx` files           | Not supported                               |
+| Nested Routes               | Supported with nested folders               | Supported with nested folders               |
+| Dynamic Routes              | Supported with `[param]` syntax             | Supported with `[param]` syntax             |
+| API Routes                  | Defined in `app/api/` with `route.ts`      | | Defined in `pages/api/` with files         |
+| Loading and Error States    | Supported with `loading.tsx` and `error.tsx | Not natively supported                      |
+| Server Actions              | Supported                                  | Not supported                              |
+
+
+
 URL Structure and Route Segments
 
 Segments can be:
