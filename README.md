@@ -688,3 +688,106 @@ const res = await fetch('https://api.example.com/posts', {
 });
 ```
 
+**2. Dynamic Rendering (SSR)**
+
+Triggered when:
+
+- `fetch()` uses cache: `"no-store"`
+- Dynamic functions are used:
+
+  - `cookies()`
+  - `headers()`
+  - `useParams()` or dynamic routes
+- Route has dynamic configuration
+
+Example:
+```typescript
+// app/dashboard/page.tsx
+export default async function DashboardPage() {
+  const res = await fetch('https://api.example.com/user-data', {
+    cache: 'no-store' // forces SSR
+  });
+  const data = await res.json();
+  return <div>Welcome, {data.name}</div>;
+}
+```
+This page is rendered on each request.
+
+**3. CSR (Client-Side Rendering)**
+
+CSR occurs when a component includes `"use client"` and fetches data via React hooks.
+
+Example:
+```typescript
+// app/profile/page.tsx
+"use client";
+import { useEffect, useState } from 'react';
+export default function ProfilePage() {
+  const [profile, setProfile] = useState(null);
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(res => res.json())
+      .then(data => setProfile(data));
+  }, []);
+  return <div>{profile ? `Hello, ${profile.name}` : 'Loading...'}</div>;
+}
+```
+This component fetches data on the client side after hydration.
+
+#### Data Fetching Patterns in the App Router
+
+**1. Fetch inside Server Components (Preferred)**
+
+```typescript
+// app/products/page.tsx
+export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return (
+    <div>
+      {products.map(p => (
+        <h2 key={p.id}>{p.name}</h2>
+      ))}
+    </div>
+  );
+}
+```
+This fetch runs on the server during rendering.
+
+**2. Fetch in Route Handlers (`app/api/.../route.js`)**
+
+```typescript
+// app/api/products/route.ts
+import { NextResponse } from 'next/server';
+export async function GET() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return NextResponse.json(products);
+}
+```
+This creates an API endpoint for client components to consume.
+
+**3. Streaming with Suspense**
+Next.js supports streaming HTML with React Suspense for better performance.
+```typescript
+// app/dashboard/page.tsx
+import { Suspense } from 'react';
+export default function DashboardPage() {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <Suspense fallback={<div>Loading stats...</div>}>
+        <StatsComponent />
+      </Suspense>
+    </div>
+  );
+}
+async function StatsComponent() {
+  const res = await fetch('https://api.example.com/stats', { cache: 'no-store' });
+  const stats = await res.json();
+  return <div>{/* render stats */}</div>;
+}
+```
+This allows parts of the page to load independently.
+
+#### Data Fetching and Rendering in the Pages Router (`pages/`)
