@@ -614,92 +614,77 @@ Next.js 13 introduced the concept of Server and Client Components to optimize re
 - Routing functions (`useRouter`, `usePathname`, `useSearchParams`) are client-side only.
 
 
-## Data Fetching and Rendering
-Next.js provides several methods for data fetching and rendering, allowing you to choose the best approach for your application's needs. Here are the main methods:
-1. **Static Site Generation (SSG)**:
-   - Use `getStaticProps` to fetch data at build time.
-   - Ideal for pages that can be pre-rendered and do not require frequent updates.
-- Example:
+## Data Fetching and Rendering in Next.js
+Next.js is a hybrid React framework, enabling multiple rendering and data-fetching strategies. It allows developers to choose how and when data is fetched and how the HTML is generated for each route or component.
+
+The core categories are:
+
+1. Server-Side Rendering (SSR)
+2. Static Site Generation (SSG)
+3. Incremental Static Regeneration (ISR)
+4. Client-Side Rendering (CSR)
+5. React Server Components (RSC) rendering (App Router)
+6. Route Handlers and API Routes
+
+Next.js selects rendering behavior based on:
+
+- Where data is fetched (server or client)
+- Whether caching is enabled
+- Whether the route is static or dynamic
+- Whether the component runs in a server or client environment
+
+This hybrid model allows maximum flexibility in building scalable, fast applications.
+
+#### Data Fetching and Rendering in the App Router (`app/` directory)
+
+**Default Behavior: Server Components & Server Rendering**
+
+In the App Router:
+
+- Components are Server Components by default.
+- Data fetching is naturally server-side.
+- HTML is generated on the server and streamed to the client.
+- Client components must be explicitly marked with `"use client"`.
+
+This means SSR is the default unless caching tells Next.js otherwise.
+
+#### Rendering Types in the App Router
+
+**1. Static Rendering (SSG)**
+
+Static pages are generated at build time or during background regeneration.
+
+Next.js automatically statically renders a route when:
+
+- All data uses `fetch()` without `no-store`
+- No dynamic functions (`cookies()`, `headers()`, `useSearchParams`)
+- No dynamic segment without explicit revalidation
+
+Example:
 ```typescript
-   // pages/index.tsx
-   export async function getStaticProps() {
-     const data = await fetchData();
-     return { props: { data } };
-   }
-   const HomePage = ({ data }) => {
-     return <div>{data}</div>;
-   };
-   export default HomePage;
+// app/blog/page.tsx
+export default async function BlogPage() {
+  const res = await fetch('https://api.example.com/posts', {
+    cache: 'force-cache' // default behavior
+  });
+  const posts = await res.json();
+  return (
+    <div>
+      {posts.map(post => (
+        <h2 key={post.id}>{post.title}</h2>
+      ))}
+    </div>
+  );
+}
 ```
-2. **Server-Side Rendering (SSR)**:
-   - Use `getServerSideProps` to fetch data on each request.
-   - Suitable for pages that require up-to-date data on every load.
-- Example:
+If the API response is cacheable, this page becomes static.
+
+*Revalidation (ISR)*
+
+You can revalidate static data:
 ```typescript
-     // pages/index.tsx
-     export async function getServerSideProps() {
-       const data = await fetchData();
-       return { props: { data } };
-     }
-     const HomePage = ({ data }) => {
-       return <div>{data}</div>;
-     };
-     export default HomePage;
+const res = await fetch('https://api.example.com/posts', {
+  next: { revalidate: 60 } // Revalidate every 60 seconds
+});
 ```
-3. **Client-Side Fetching**:
-   - Use React hooks like `useEffect` to fetch data on the client side.
-   - Useful for interactive pages where data needs to be fetched after the initial render.
-- Example:
-```typescript
-     // pages/index.tsx
-     import { useEffect, useState } from 'react';
-     const HomePage = () => {
-       const [data, setData] = useState(null);
-       useEffect(() => {
-         async function fetchData() {
-           const response = await fetch('/api/data');
-           const result = await response.json();
-           setData(result);
-         }
-         fetchData();
-       }, []);
-       return <div>{data}</div>;
-     };
-     export default HomePage;
-```
-4. **Incremental Static Regeneration (ISR)**:
-   - Use `revalidate` in `getStaticProps` to update static pages after a specified interval.
-   - Allows you to keep static content fresh without rebuilding the entire site.
-- Example:
-```typescript
-     // pages/index.tsx
-     export async function getStaticProps() {
-       const data = await fetchData();
-       return {
-         props: { data },
-         revalidate: 60, // Revalidate every 60 seconds
-       };
-     }
-     const HomePage = ({ data }) => {
-       return <div>{data}</div>;
-     };
-     export default HomePage;
-```
-5. **Server Actions**:
-   - Functions that can be called from the client to perform server-side logic, such as form submissions and database operations.
-- Example:
-```typescript
-     // src/app/contact/page.tsx
-     'use server';
-     export async function submitForm(data: FormData) {
-       // Handle form submission on the server
-     }
-     const ContactPage = () => {
-       return (
-         <form action={submitForm}>
-           {/* Form fields */}
-         </form>
-       );
-     };
-     export default ContactPage;
-```
+
