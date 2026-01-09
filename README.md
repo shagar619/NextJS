@@ -791,3 +791,84 @@ async function StatsComponent() {
 This allows parts of the page to load independently.
 
 #### Data Fetching and Rendering in the Pages Router (`pages/`)
+
+**1. `getStaticProps` (SSG)**
+```typescript
+// pages/blog.js
+export async function getStaticProps() {
+  const res = await fetch('https://api.example.com/posts');
+  const posts = await res.json();
+  return { props: { posts } };
+}
+export default function BlogPage({ posts }) {
+  return (
+    <div>
+      {posts.map(post => (
+        <h2 key={post.id}>{post.title}</h2>
+      ))}
+    </div>
+  );
+}
+```
+This pre-renders the page at build time.
+**2. `getServerSideProps` (SSR)**
+```typescript
+// pages/dashboard.js
+export async function getServerSideProps() {
+  const res = await fetch('https://api.example.com/user-data');
+  const data = await res.json();
+  return { props: { data } };
+}
+export default function DashboardPage({ data }) {
+  return <div>Welcome, {data.name}</div>;
+}
+```
+This renders the page on each request.
+**3. Client-Side Fetching (CSR)**
+```typescript
+// pages/profile.js
+import { useEffect, useState } from 'react';
+export default function ProfilePage() {
+  const [profile, setProfile] = useState(null);
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(res => res.json())
+      .then(data => setProfile(data));
+  }, []);
+  return <div>{profile ? `Hello, ${profile.name}` : 'Loading...'}</div>;
+}
+```
+This fetches data on the client after the page loads.
+
+#### Professional Rendering Patterns
+
+**1. Hybrid Rendering**
+Combine SSR and CSR for optimal performance and interactivity.
+```typescript
+// app/dashboard/page.tsx
+export default async function Dashboard() {
+  const profile = await fetchProfile(); // SSR
+  return (
+    <>
+      <Header user={profile} />
+      <LiveMetrics />      // CSR client component
+    </>
+  );
+}
+// app/dashboard/LiveMetrics.js
+"use client";
+import { useEffect, useState } from "react";
+export default function LiveMetrics() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await fetch("/api/metrics");
+      const json = await res.json();
+      setData(json);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+  return <MetricsGraph data={data} />;
+}
+```
+This approach uses SSR for initial load and CSR for real-time updates.
