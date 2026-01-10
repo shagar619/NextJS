@@ -872,3 +872,36 @@ export default function LiveMetrics() {
 }
 ```
 This approach uses SSR for initial load and CSR for real-time updates.
+
+
+
+
+
+## Environment Variables in Next.js
+Environment variables allow you to store configuration values outside your codebase, typically used for:
+
+- API keys
+- Database connection URLs
+- Third-party credentials
+- Feature flags
+- Runtime configuration
+
+Next.js automatically loads environment variables from specific `.env*` files and injects them into the Node.js runtime (server) or browser (client), depending on how you name them.
+
+**Next.js supports multiple environment files:**
+- `.env` - Default environment file
+- `.env.local` - Local environment file (not committed to version control)
+- `.env.[environment]` - Environment-specific files (e.g., `.env.production`)
+- `.env.[environment].local` - Local environment-specific files (e.g., `.env.production.local`)
+- `.env.test` - For test environments
+
+#### Naming Rules (Server vs Client)
+
+**1. Server-Only Environment Variables**
+Variables WITHOUT the `NEXT_PUBLIC_` prefix are only available on the server:
+
+Examples:
+```
+DATABASE_URL="postgres://user:password@localhost:5432/mydb"
+API_SECRET_KEY="supersecretkey"
+```
