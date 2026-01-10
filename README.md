@@ -905,3 +905,139 @@ Examples:
 DATABASE_URL="postgres://user:password@localhost:5432/mydb"
 API_SECRET_KEY="supersecretkey"
 ```
+
+These variables are never sent to the browser and are SAFE to store sensitive data.
+
+They can be used in:
+
+- Server components (`app/`)
+- Route Handlers (`route.js`)
+- API Routes (`pages/api/*`)
+- `getServerSideProps`
+- `getStaticProps`
+- Middleware (Edge Runtime)
+
+Usage example:
+```typescript
+// app/api/data/route.ts
+export async function GET() {
+  const dbUrl = process.env.DATABASE_URL;
+  // Use dbUrl to connect to the database
+}
+```
+
+**2. Client-Accessible Environment Variables**
+Variables WITH the `NEXT_PUBLIC_` prefix are exposed to both server and client:
+Examples:
+```
+NEXT_PUBLIC_API_BASE_URL="https://api.example.com"
+NEXT_PUBLIC_ANALYTICS_ID="UA-12345678-1"
+```
+These variables are included in the client-side bundle and can be accessed in:
+- Client components (`"use client"`)
+- Pages (`pages/`)
+- Client-side JavaScript example:
+```typescript
+// app/page.tsx
+"use client";
+export default function HomePage() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  return <div>API Base URL: {apiUrl}</div>;
+}
+```
+
+
+**Environment Variables in the App Router (`app/`)**
+
+**1. Server Components**
+In Server Components, you can access both server-only and client-accessible environment variables using `process.env.VARIABLE_NAME`.
+Example:
+```typescript
+// app/api/data/route.ts
+export async function GET() {
+  const secretKey = process.env.API_SECRET_KEY; // Server-only
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Client-accessible
+  // Use the variables as needed
+}
+```
+
+**2. Client Components**
+In Client Components (marked with `"use client"`), you can only access client-accessible environment variables prefixed with `NEXT_PUBLIC_`.
+Example:
+```typescript
+// app/page.tsx
+"use client";
+export default function HomePage() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Accessible
+  const secretKey = process.env.API_SECRET_KEY; // Undefined in client
+  return <div>API Base URL: {apiUrl}</div>;
+}
+```
+
+
+#### Environment Variables in the Pages Router (`pages/`)
+
+**1. `getServerSideProps`**
+In `getServerSideProps`, you can access both server-only and client-accessible environment variables using `process.env.VARIABLE_NAME`.
+Example:
+```typescript
+// pages/index.tsx
+export default function HomePage() {
+  return <div>API Base URL: {process.env.NEXT_PUBLIC_API_BASE_URL}</div>;
+}
+
+export async function getServerSideProps() {
+  const secretKey = process.env.API_SECRET_KEY; // Server-only
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Client-accessible
+  return {
+    props: {
+      secretKey,
+      apiUrl,
+    },
+  };
+}
+```
+
+**2. `getStaticProps`**
+In `getStaticProps`, you can access both server-only and client-accessible environment variables using `process.env.VARIABLE_NAME`.
+Example:
+```typescript
+// pages/index.tsx
+export default function HomePage() {
+  return <div>API Base URL: {process.env.NEXT_PUBLIC_API_BASE_URL}</div>;
+}
+
+export async function getStaticProps() {
+  const secretKey = process.env.API_SECRET_KEY; // Server-only
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Client-accessible
+  return {
+    props: {
+      secretKey,
+      apiUrl,
+    },
+  };
+}
+```
+
+
+#### Accessing Environment Variables
+
+You can access environment variables using `process.env.VARIABLE_NAME` syntax.
+Example:
+```typescript
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+const secretKey = process.env.API_SECRET_KEY; // Server-only
+```
+
+**Best Practices**
+- Use `.env.local` for sensitive data and local overrides.
+- Never commit sensitive information to version control.
+- Use `NEXT_PUBLIC_` prefix only for non-sensitive data needed on the client.
+- Validate the presence of required environment variables at startup to avoid runtime errors.
+```typescript
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not defined");
+}
+```
+- Document required environment variables for your team in the README or a separate configuration file.
+
