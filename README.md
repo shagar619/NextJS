@@ -875,6 +875,89 @@ This approach uses SSR for initial load and CSR for real-time updates.
 
 
 
+## Difference Between `getServerSideProps` and `getStaticProps` in Next.js
+
+`getServerSideProps` and `getStaticProps` are both functions used for data fetching in Next.js, but they differ in how and when the data is fetched:
+| Aspect                     | getServerSideProps                         | getStaticProps                            |
+|----------------------------|--------------------------------------------|-------------------------------------------|
+| When Data is Fetched       | On every request to the page               | At build time (static generation)         |
+| Use Case                   | Dynamic data that changes frequently       | Static data that doesn't change often      |
+| Performance Impact         | Slower initial load due to server rendering| Faster initial load due to pre-rendered HTML |
+| Caching                    | No caching, always fresh data              | Can be cached and revalidated                        |
+| SEO                        | Good for SEO as HTML is generated on server| Good for SEO as HTML is pre-rendered          |
+
+
+**1. `getServerSideProps`: Server-Side Rendering (SSR)**
+
+Execution Timing:
+- Runs on every request.
+- Executes only on the server, never on the client.
+- Used when data must always be fresh.
+
+When to Use
+
+Use SSR when:
+
+- The page content changes on every request.
+- You need access to user-specific information (cookies, sessions, auth tokens).
+- Data is highly dynamic (e.g., stock prices, dashboards, personalized feeds).
+
+
+Performance:
+
+- Slower than static generation because the server must compute the page for each request.
+- Good for real-time or personalized content.
+- Not suitable for extremely high-traffic pages unless optimized.
+
+Example:
+```typescript
+// pages/dashboard.tsx
+export async function getServerSideProps(context) {
+  const res = await fetch('https://api.example.com/user-data');
+  const data = await res.json();
+  return { props: { data } };
+}
+export default function DashboardPage({ data }) {
+  return <div>Welcome, {data.name}</div>;
+}
+```
+
+**2. `getStaticProps`: Static Site Generation (SSG)**
+
+Execution Timing:
+- Runs at build time.
+- Generates static HTML files that can be served quickly.
+- Used when data does not change often.
+
+When to Use SSG when:
+- The page content is static or changes infrequently.
+- You want the fastest possible load times.
+
+Performance:
+- Fastest initial load since HTML is pre-rendered.
+- Can be cached globally via CDNs.
+- Suitable for blogs, documentation, marketing pages.
+
+Example:
+```typescript
+// pages/blog.js
+export async function getStaticProps() {
+  const res = await fetch('https://api.example.com/posts');
+  const posts = await res.json();
+  return { props: { posts } };
+}
+export default function BlogPage({ posts }) {
+  return (
+    <div>
+      {posts.map(post => (
+        <h2 key={post.id}>{post.title}</h2>
+      ))}
+    </div>
+  );
+}
+```
+
+
 
 
 ## Environment Variables in Next.js
@@ -1040,7 +1123,6 @@ if (!process.env.DATABASE_URL) {
 }
 ```
 - Document required environment variables for your team in the README or a separate configuration file.
-
 
 
 
