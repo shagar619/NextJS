@@ -957,6 +957,61 @@ export default function BlogPage({ posts }) {
 }
 ```
 
+## Image Component and Image Optimization in Next.js
+
+Next.js provides a built-in `Image` component that automatically optimizes images for better performance. The `next/image` component offers features like lazy loading, responsive images, and automatic resizing.
+
+It provides advanced features such as:
+- Automatic image optimization
+- Responsive images with `srcSet`
+- Lazy loading by default
+- Support for various image formats (JPEG, PNG, WebP, AVIF)
+- Automatic resizing
+- Built-in caching
+- Device-size adaptation
+- Layout control
+Example Usage:
+```typescript
+// src/app/page.tsx
+import Image from 'next/image';
+const HomePage = () => {
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+      <Image
+        src="/images/my-image.jpg" // Path to your image
+        alt="My Image"
+        width={600}                // Desired width
+        height={400}               // Desired height
+        quality={75}               // Image quality (1-100)
+      />
+    </div>
+  );
+};
+export default HomePage;
+```
+
+#### Key Features of the Next.js Image Component
+
+1. **Automatic Optimization**: Images are automatically optimized on-demand, reducing file size without sacrificing quality.
+Example for responsive use:
+```typescript
+<Image
+  src="/images/photo.jpg"
+  alt="A photo"
+  width={800}
+  height={600}
+  sizes="(max-width: 600px) 100vw, 800px" // Responsive sizes
+/>
+```
+2. **Lazy Loading**: Images are lazy-loaded by default, meaning they only load when they enter the viewport, improving initial page load times.
+3. **Responsive Images**: The `Image` component generates multiple versions of an image for different screen sizes and resolutions, serving the most appropriate one based on the device.
+4. **Built-in Caching**: Optimized images are cached for faster subsequent loads.
+
+
+
+
+
 
 
 
