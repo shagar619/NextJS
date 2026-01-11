@@ -1008,11 +1008,35 @@ Example for responsive use:
 3. **Responsive Images**: The `Image` component generates multiple versions of an image for different screen sizes and resolutions, serving the most appropriate one based on the device.
 4. **Built-in Caching**: Optimized images are cached for faster subsequent loads.
 
-
-
-
-
-
+**Remote Images Support:**
+Next.js allows you to optimize images from remote sources by configuring the `next.config.js` file:
+```javascript
+// next.config.js
+module.exports = {
+  images: {
+    domains: ['example.com'], // Add your remote image domains here
+  },
+};
+```
+Then you can use remote images like this:
+```typescript
+<Image
+  src="https://example.com/path/to/image.jpg"
+  alt="Remote Image"
+  width={800}
+  height={600}
+/>
+```
+**Common Image Component Props:**
+| Prop        | Description                                      |
+|-------------|--------------------------------------------------|
+| `src`       | The path or URL of the image                     |
+| `alt`       | Alternative text for accessibility               |
+| `width`     | Desired width of the image                       |
+| `height`    | Desired height of the image                      |
+| `quality`   | Image quality (1-100)                            |
+| `sizes`     | Responsive sizes for different viewports         |
+| `priority`  | Load image with higher priority                  |
 
 
 ## Environment Variables in Next.js
