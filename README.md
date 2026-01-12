@@ -1035,8 +1035,59 @@ Then you can use remote images like this:
 | `width`     | Desired width of the image                       |
 | `height`    | Desired height of the image                      |
 | `quality`   | Image quality (1-100)                            |
-| `sizes`     | Responsive sizes for different viewports         |
+| `sizes`     | Responsive sizes for different view ports         |
 | `priority`  | Load image with higher priority                  |
+
+
+
+
+## Working with Custom Server Middleware in Next.js
+
+Next.js provides a built-in Middleware system that allows you to run custom code before a request is completed. This executes on the Edge Runtime, enabling extremely fast, low-latency operations such as:
+
+- Authentication and access control
+- Redirects and rewrites
+- Request logging
+- User agent detection
+- Geo-based routing
+- Request/response transformation
+
+This middleware runs between the user’s request and the route handler/page.
+
+Middleware is a function that executes:
+
+- Before rendering page or API responses
+- On the edge, not in Node.js
+- For every request that matches its config
+- With read-only access to the request body and headers
+
+It allows you to modify:
+
+- Request (`req`)
+- Response (`res`) through rewrites, redirects, or NextResponse utilities
+
+Middleware file must be named:
+```
+middleware.ts
+```
+
+Or,
+```
+middleware.js
+```
+
+Basic Middleware Example:
+```typescript
+// middleware.ts
+import { NextResponse } from "next/server";
+
+export function middleware(request) {
+  console.log("Middleware executed for:", request.url);
+
+  return NextResponse.next();
+}
+```
+
 
 
 ## Environment Variables in Next.js
