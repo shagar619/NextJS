@@ -1089,6 +1089,121 @@ export function middleware(request) {
 ```
 
 
+## `proxy.ts` in Next.js
+
+A `proxy.ts` file is not a built-in Next.js file, but it is a commonly used custom utility module developers create to forward or proxy API requests from the Next.js application to external services, backends, or microservices.
+
+It serves as a centralized layer to:
+
+-  CORS issues
+- hide backend service URLs
+- unify API endpoints
+- secure private APIs
+- inject middleware logic (headers, auth tokens)
+- rewrite or route API paths
+- enable server-side communication without exposing secrets to the client
+
+In professional Next.js codebases, a `proxy.ts` file typically handles routing logic in one of these environments:
+
+1. Custom Node.js server (Next.js custom server mode)
+2. Next.js Route Handlers (`app/api/.../route.ts`)
+3. API Routes (`pages/api/*.ts`)
+4. Next.js Middleware (`middleware.ts`)
+5. External proxy layer (Nginx, Vercel Edge Functions)
+
+The file name `proxy.ts` is a convention, not a requirement, but it signals that its job is to forward traffic.
+
+Example:
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { getDefaultDashboardRoute, getRouteOwner, isAuthRoute, UserRole } from "./lib/auth-utils";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { deleteCookie, getCookie } from "./services/auth/tokenHandlers";
+
+
+
+// This function can be marked `async` if using `await` inside
+export async function proxy(request: NextRequest) {
+
+     const pathname = request.nextUrl.pathname;
+
+     // const accessToken = request.cookies.get("accessToken")?.value || null;
+
+     const accessToken = await getCookie("accessToken") || null;
+
+     let userRole: UserRole | null = null;
+
+     if (accessToken) {
+          const verifiedToken: JwtPayload | string = jwt.verify(accessToken, process.env.JWT_SECRET as string);
+
+          if (typeof verifiedToken === "string") {
+               await deleteCookie("accessToken");
+               await deleteCookie("refreshToken");
+               return NextResponse.redirect(new URL('/login', request.url));
+          }
+
+          userRole = verifiedToken.role;
+     }
+
+     const routeOwner = getRouteOwner(pathname);
+     //path = /doctor/appointments => "DOCTOR"
+     //path = /my-profile => "COMMON"
+     //path = /login => null
+
+     const isAuth = isAuthRoute(pathname);
+
+     // Rule 1 : User is logged in and trying to access auth route. Redirect to default dashboard
+
+     if (accessToken && isAuth) {
+          return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole),request.url));
+     }
+
+     // Rule 2 : User is trying to access open public route
+     if (routeOwner === null) {
+          return NextResponse.next();
+     }
+
+     // Rule 1 & 2 for open public routes and auth routes handled, now handle protected routes
+
+     // Rule 3 : User is not logged in and trying to access protected route
+     if (!accessToken) {
+          const loginUrl = new URL('/login', request.url);
+          loginUrl.searchParams.set('redirect', pathname);
+          return NextResponse.redirect(loginUrl);
+     }
+
+     // Rule 4 : User is trying to access common protected route
+     if (routeOwner === "COMMON") {
+          return NextResponse.next();
+     }
+
+     // Rule 5 : User is trying to access role based protected route
+     if (routeOwner === "ADMIN" || routeOwner === "DOCTOR" || routeOwner === "PATIENT") {
+          if (userRole !== routeOwner) {
+               // Redirect to default dashboard
+               return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+          }
+     }
+
+     return NextResponse.next();
+}
+
+
+export const config = {
+     matcher: [
+     /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+     '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.well-known).*)',
+],
+}
+```
+
+
 
 ## Environment Variables in Next.js
 Environment variables allow you to store configuration values outside your codebase, typically used for:
