@@ -1215,7 +1215,166 @@ middleware.ts
 
 > This matches enterprise expectations and keeps boundaries clear.
 
+**5. App Router Layout-Based Guards (Alternative to Middleware)**
 
+Example: dashboard layout with auth guard
+```tsx
+// src/app/dashboard/layout.tsx
+import { redirect } from 'next/navigation';
+import { getAuthSession } from '@/lib/auth/session';
+
+export default async function DashboardLayout({ children }) {
+  const session = await getAuthSession();
+
+  if (!session) {
+    redirect('/login');
+  }
+
+  return <>{children}</>;
+}
+```
+
+When to use layout guards
+
+- Server-rendered pages needing auth
+- Per-section guarding instead of global middleware
+- Access to server components context
+
+When NOT to use layout guards
+
+- For API route protection
+- For role-based permission enforcement
+- To secure static assets
+- When requiring uniform global protection
+
+
+**6. Error Pages: 403 & 500 & 404 Templates**
+
+403 Page
+```tsx
+// src/app/403/page.tsx
+export default function ForbiddenPage() {
+  return (
+    <div>
+      <h1>403 - Forbidden</h1>
+      <p>You do not have permission to access this page.</p>
+    </div>
+  );
+}
+```
+
+500 Page
+```tsx
+// src/app/500/page.tsx
+export default function ServerError() {
+  return <h1>500 - Server Error</h1>;
+}
+```
+
+404 Page
+```tsx
+// src/app/not-found.tsx
+export default function NotFoundPage() {
+  return <h1>404 - Page Not Found</h1>;
+}
+```
+
+**7. Using Rewrites, Redirects, and Headers via Middleware**
+
+Rewrite Example (Proxy backend)
+```typescript
+if (pathname.startsWith('/api/users')) {
+  const url = req.nextUrl.clone();
+  url.pathname = '/api/internal/users';
+  return NextResponse.rewrite(url);
+}
+```
+
+Redirect Example
+```typescript
+if (pathname === '/old-dashboard') {
+  return NextResponse.redirect(new URL('/dashboard', req.url));
+}
+```
+
+Add Headers
+```typescript
+response.headers.set('X-App-Env', process.env.NODE_ENV);
+```
+
+**8. Optional: Integration with NextAuth Middleware**
+
+If using NextAuth, use:
+```typescript
+export { default } from 'next-auth/middleware';
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
+};
+```
+
+**9. Full Production-Ready Middleware Blueprint**
+
+Combining everything:
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyJWT } from './src/lib/auth/verifyJWT';
+import { routeConfig } from './src/config/route-config';
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const token = req.cookies.get('token')?.value;
+
+  // Allow public routes
+  if (routeConfig.publicRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // Redirect if not logged in
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  let decoded;
+  try {
+    decoded = await verifyJWT(token);
+  } catch {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  const role = decoded.role;
+
+  // RBAC enforcement
+  for (const route of routeConfig.roleBasedRoutes) {
+    if (pathname.startsWith(route.pattern)) {
+      if (!route.allowedRoles.includes(role)) {
+        return NextResponse.redirect(new URL('/403', req.url));
+      }
+    }
+  }
+
+  // Example rewrite
+  if (pathname.startsWith('/proxy/api')) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/api/internal/proxy';
+    return NextResponse.rewrite(url);
+  }
+
+  const res = NextResponse.next();
+
+  // Example headers
+  res.headers.set('X-Security-Policy', 'active');
+  res.headers.set('X-Frame-Options', 'DENY');
+
+  return res;
+}
+
+export const config = {
+  matcher: ['/((?!_next|static|public).*)'],
+};
+```
 
 
 
