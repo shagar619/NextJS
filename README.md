@@ -1161,6 +1161,61 @@ export async function verifyJWT(token: string) {
 }
 ```
 
+**3. Centralized Route Configuration (Highly Recommended)**
+
+```typescript
+// src/config/route-config.ts
+export const routeConfig = {
+  publicRoutes: ['/', '/login', '/signup', '/api/public'],
+
+  roleBasedRoutes: [
+    {
+      pattern: '/admin',
+      allowedRoles: ['admin'],
+    },
+    {
+      pattern: '/editor',
+      allowedRoles: ['admin', 'editor'],
+    },
+    {
+      pattern: '/dashboard',
+      allowedRoles: ['admin', 'editor', 'user'],
+    },
+  ],
+};
+```
+> This keeps routing logic clean and easily maintainable.
+
+**4. Production Folder Structure for Large-Scale App**
+
+```arduino
+src/
+  app/
+    (public)/
+    dashboard/
+    admin/
+    editor/
+    api/
+  components/
+  hooks/
+  lib/
+    auth/
+      verifyJWT.ts
+      hash.ts
+    db/
+    logger/
+  middlewares/
+  config/
+    route-config.ts
+  utils/
+  types/
+middleware.ts
+.env
+```
+
+> This matches enterprise expectations and keeps boundaries clear.
+
+
 
 
 
