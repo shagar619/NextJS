@@ -1089,6 +1089,81 @@ export function middleware(request) {
 ```
 
 
+
+
+## Advanced Routing & Middleware Capabilities in Next.js
+
+Next.js provides powerful routing customization through Middleware, which runs before a request is completed. It allows you to intercept requests and modify behavior such as authentication checks, rewrites, redirects, and access control.
+
+**1. Enterprise-Grade Middleware Template (Production Ready)**
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyJWT } from './src/lib/auth/verifyJWT';
+import { routeConfig } from './src/config/route-config';
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const token = req.cookies.get('token')?.value;
+
+  // Public Routes Skip Authentication
+  if (routeConfig.publicRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // No token => redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  // Validate Token
+  const decoded = await verifyJWT(token).catch(() => null);
+  if (!decoded) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  const userRole = decoded.role;
+
+  // RBAC Enforcement
+  for (const { pattern, allowedRoles } of routeConfig.roleBasedRoutes) {
+    if (pathname.startsWith(pattern)) {
+      if (!allowedRoles.includes(userRole)) {
+        return NextResponse.redirect(new URL('/403', req.url));
+      }
+    }
+  }
+
+  // Add security headers
+  const response = NextResponse.next();
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next|favicon.ico|public|static).*)', // Protect everything except static
+  ],
+};
+```
+
+**2. JWT Authentication Helpers (`verifyJWT.ts`)**
+
+```typescript
+// src/lib/auth/verifyJWT.ts
+import jwt from 'jsonwebtoken';
+
+export async function verifyJWT(token: string) {
+  return jwt.verify(token, process.env.JWT_SECRET as string);
+}
+```
+
+
+
+
 ## `proxy.ts` in Next.js
 
 A `proxy.ts` file is not a built-in Next.js file, but it is a commonly used custom utility module developers create to forward or proxy API requests from the Next.js application to external services, backends, or microservices.
