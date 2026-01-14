@@ -1494,6 +1494,19 @@ export const config = {
 
 
 
+## Docker Image in Next.js?
+
+A Docker image in Next.js is a pre-packaged, immutable blueprint that contains:
+
+1. The Next.js application code
+2. All required dependencies (Node.js runtime, libraries, packages)
+3. Your application’s environment configuration
+4. The build output (`.next` folder)
+5. Any system-level components needed to run the app
+
+Once created, this image can be executed as a Docker container anywhere—locally, in CI/CD, or on cloud platforms—ensuring consistent behavior across all environments.
+
+
 ## Environment Variables in Next.js
 Environment variables allow you to store configuration values outside your codebase, typically used for:
 
