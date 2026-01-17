@@ -1600,6 +1600,16 @@ export default function HomePage() {
 - Improves SEO: Faster page loads can positively impact search engine rankings.
 - Improves Core Web Vitals metrics by reducing load times and improving interactivity.
 
+**When Next.js Prefetches Content**
+
+Next.js prefetches content when:
+
+1. A `<Link>` component is visible in the viewport.
+2. The user hovers over a link (if enabled).
+3. The user navigates to a page that has been prefetched.
+4. You manually call the `prefetch` method.
+5. During idle time when the browser is not busy.
+
 
 
 ## Environment Variables in Next.js
