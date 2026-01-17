@@ -1569,8 +1569,36 @@ export default function HomePage() {
   );
 }
 ```
+2. Intersection Observer: Next.js uses the Intersection Observer API to detect when a link enters the viewport and triggers prefetching.
+3. Caching: Prefetched resources are cached in the browser, so subsequent navigations to the same page are instantaneous.
 
+**Types of Prefetching in Next.js**
+1. Automatic Prefetching: Enabled by default for `<Link>` components. It prefetches pages when they are in the viewport.
+2. Manual Prefetching: You can manually trigger prefetching using the `prefetch` method on the `next/router` object.
+```typescript
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+export default function HomePage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.prefetch('/about');
+  }, []);
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+      <button onClick={() => router.push('/about')}>Go to About Page</button>
+    </div>
+  );
+}
+```
 
+**Why Prefetching Improves Performance**
+- Reduces Latency: By preloading resources, it minimizes the time taken to load a page when the user navigates to it.
+- Enhances User Experience: Faster navigation leads to a smoother and more responsive user experience.
+- Smoother UX for Multi-Page Sites
+- Reduces Perceived Load Times: Users perceive the application as faster since pages load almost instantly.
+- Improves SEO: Faster page loads can positively impact search engine rankings.
+- Improves Core Web Vitals metrics by reducing load times and improving interactivity.
 
 
 
