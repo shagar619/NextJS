@@ -1545,6 +1545,34 @@ This reduces image size and improves security.
 
 
 
+## Prefetching in Next.js
+Prefetching in Next.js is a performance optimization technique where the framework automatically fetches and caches resources for future navigation before the user explicitly requests them.
+
+This means Next.js downloads:
+
+- Page code (JavaScript bundles)
+- Data used for rendering (if statically generated)
+- Route information
+
+ahead of time, so that when the user clicks a link, the transition is near-instant.
+
+**How Prefetching Works:**
+1. Link Component: Next.js uses the `<Link>` component to wrap navigation links. By default, it prefetches the linked page when the link is visible in the viewport.
+```typescript
+import Link from 'next/link';
+export default function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+      <Link href="/about">Go to About Page</Link>
+    </div>
+  );
+}
+```
+
+
+
+
 
 ## Environment Variables in Next.js
 Environment variables allow you to store configuration values outside your codebase, typically used for:
